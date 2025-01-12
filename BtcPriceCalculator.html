@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTC 價格 & 停損停利計算</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      padding: 0;
+      background-color: #f7f7f7;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 5px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background-color: #3498db;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+    }
+    .price-row span {
+      font-weight: bold;
+    }
+    .result-container {
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #fafafa;
+    }
+    .result-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>BTC 價格與停損停利計算</h1>
+    <button onclick="fetchPrices()">重整</button>
+    <div id="priceSection">
+      <!-- 價格資料會顯示在這裡 -->
+    </div>
+  </div>
+
+  <script>
+    async function fetchPrices() {
+      const apis = {
+        binance: 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', 
+        coinbase: 'https://api.coinbase.com/v2/prices/BTC-USD/spot',
+        coindesk: 'https://api.coindesk.com/v1/bpi/currentprice.json'
+      };
+
+      try {
+        const [binanceRes, coinbaseRes, coindeskRes] = await Promise.all([
+          fetch(apis.binance),
+          fetch(apis.coinbase),
+          fetch(apis.coindesk)
+        ]);
+
+        const binanceData = await binanceRes.json();
+        const coinbaseData = await coinbaseRes.json();
+        const coindeskData = await coindeskRes.json();
+
+        const binancePrice = parseFloat(binanceData.price); 
+        const coinbasePrice = parseFloat(coinbaseData.data.amount);
+        const coindeskPrice = parseFloat(coindeskData.bpi.USD.rate.replace(/,/g, ''));
+
+        const priceSection = document.getElementById('priceSection');
+        priceSection.innerHTML = `
+          <h2>當前價格</h2>
+          <div class="price-row">
+            <div>Binance</div>
+            <div><span>$${binancePrice.toFixed(2)}</span></div>
+          </div>
+          <div class="price-row">
+            <div>Coinbase</div>
+            <div><span>$${coinbasePrice.toFixed(2)}</span></div>
+          </div>
+          <div class="price-row">
+            <div>Coindesk</div>
+            <div><span>$${coindeskPrice.toFixed(2)}</span></div>
+          </div>
+        `;
+
+        const currentPrice = binancePrice;
+
+        const longStopLoss = currentPrice * (1 - 0.02);
+        const longTakeProfit = currentPrice * (1 + 0.06);
+
+        const shortStopLoss = currentPrice * (1 + 0.03);
+        const shortTakeProfit = currentPrice * (1 - 0.10);
+
+        const resultHTML = `
+          <div class="result-container">
+            <div class="result-title">做多策略 (參考 Binance 價格)</div>
+            <div>停損(跌 2%)：$${longStopLoss.toFixed(2)}</div>
+            <div>停利(漲 6%)：$${longTakeProfit.toFixed(2)}</div>
+          </div>
+          <div class="result-container">
+            <div class="result-title">做空策略 (參考 Binance 價格)</div>
+            <div>停損(漲 3%)：$${shortStopLoss.toFixed(2)}</div>
+            <div>停利(跌 10%)：$${shortTakeProfit.toFixed(2)}</div>
+          </div>
+        `;
+
+        priceSection.innerHTML += resultHTML;
+
+      } catch (error) {
+        console.error(error);
+        document.getElementById('priceSection').innerHTML = `
+          <p style="color: red;">取得價格失敗，請稍後再試。</p>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
