@@ -115,24 +115,24 @@
         const longStopLoss2 = currentPrice * (1 - 0.002);
         const longTakeProfit2 = currentPrice * (1 + 0.01);
 
-        const shortStopLoss = currentPrice * (1 + 0.03);
-        const shortTakeProfit = currentPrice * (1 - 0.10);
+        const shortStopLoss = currentPrice * (1 + 0.001);
+        const shortTakeProfit = currentPrice * (1 - 0.006);
 
         const resultHTML = `
           <div class="result-container">
-            <div class="result-title">做多策略 1 (參考 Binance 價格)</div>
+            <div class="result-title">做多策略 (參考 Binance 價格)</div>
             <div>停損(跌 0.1%)：$${longStopLoss1.toFixed(2)}</div>
             <div>停利(漲 0.6%)：$${longTakeProfit1.toFixed(2)}</div>
           </div>
           <div class="result-container">
-            <div class="result-title">做多策略 2 (參考 Binance 價格)</div>
+            <div class="result-title">做多策略 (參考 Binance 價格)</div>
             <div>停損(跌 0.2%)：$${longStopLoss2.toFixed(2)}</div>
             <div>停利(漲 1%)：$${longTakeProfit2.toFixed(2)}</div>
           </div>
           <div class="result-container">
             <div class="result-title">做空策略 (參考 Binance 價格)</div>
-            <div>停損(漲 3%)：$${shortStopLoss.toFixed(2)}</div>
-            <div>停利(跌 10%)：$${shortTakeProfit.toFixed(2)}</div>
+            <div>停損(漲 0.1%)：$${shortStopLoss.toFixed(2)}</div>
+            <div>停利(跌 0.6%)：$${shortTakeProfit.toFixed(2)}</div>
           </div>
         `;
 
